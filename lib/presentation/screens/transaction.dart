@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../component/component.dart';
+import '../../component/component.dart';
 
 class TransactionPage extends StatelessWidget {
   const TransactionPage({super.key});

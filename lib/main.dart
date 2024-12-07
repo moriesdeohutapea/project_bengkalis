@@ -1,14 +1,16 @@
+import 'package:chucker_flutter/chucker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_bengkalis/screen/home.dart';
-import 'package:project_bengkalis/screen/profile.dart';
-import 'package:project_bengkalis/screen/transaction.dart';
-
-import 'bloc/bloc/NavigationBloc.dart';
-import 'bloc/event/NavigationEvent.dart';
-import 'bloc/state/NavigationState.dart';
+import 'package:project_bengkalis/di/injection.dart';
+import 'package:project_bengkalis/presentation/blocs/bloc/NavigationBloc.dart';
+import 'package:project_bengkalis/presentation/blocs/event/NavigationEvent.dart';
+import 'package:project_bengkalis/presentation/blocs/state/NavigationState.dart';
+import 'package:project_bengkalis/presentation/screens/home.dart';
+import 'package:project_bengkalis/presentation/screens/profile.dart';
+import 'package:project_bengkalis/presentation/screens/transaction.dart';
 
 void main() {
+  setupInjector();
   runApp(const MainApp());
 }
 
@@ -17,9 +19,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainMenu(),
+        navigatorObservers: [ChuckerFlutter.navigatorObserver],
+      home: const MainMenu(),
     );
   }
 }
@@ -28,7 +31,9 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
   final List<Widget> _pages = const [
-    HomePage(),
+    HomePage(
+      accountId: 123,
+    ),
     TransactionPage(),
     ProfilePage(),
   ];
