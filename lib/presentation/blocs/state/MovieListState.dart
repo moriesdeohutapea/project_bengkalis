@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../data/models/base_response.dart';
 import '../../../data/models/movie_list.dart';
 
 abstract class MovieListState extends Equatable {
@@ -12,13 +11,22 @@ class MovieListInitial extends MovieListState {}
 
 class MovieListLoading extends MovieListState {}
 
+class MovieListLoadingPagination extends MovieListState {
+  final List<MovieList> movieLists;
+
+  MovieListLoadingPagination(this.movieLists);
+}
+
 class MovieListLoaded extends MovieListState {
-  final BaseResponse<MovieList> movieLists;
+  final List<MovieList> movieLists;
+  final bool hasMore;
+  final int currentPage;
 
-  MovieListLoaded(this.movieLists);
-
-  @override
-  List<Object?> get props => [movieLists];
+  MovieListLoaded({
+    required this.movieLists,
+    required this.hasMore,
+    required this.currentPage,
+  });
 }
 
 class MovieListError extends MovieListState {
