@@ -19,10 +19,6 @@ class HomePage extends StatelessWidget {
       create: (context) => MovieListBloc(getIt<MovieListService>())
         ..add(FetchMovieListsEvent(
           page: 1,
-          includeAdult: false,
-          includeVideo: true,
-          language: "en-US",
-          sortBy: "popularity.desc",
         )),
       child: Scaffold(
         appBar: AppBar(

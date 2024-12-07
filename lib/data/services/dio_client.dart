@@ -14,7 +14,6 @@ class DioClient {
         receiveTimeout: const Duration(seconds: 10),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $_accessToken",
         },
       ),
     );
@@ -28,12 +27,13 @@ class DioClient {
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
+    bool useToken = true,
   }) async {
     try {
       final response = await _dio.get(
         path,
         queryParameters: queryParameters,
-        options: Options(headers: _mergeHeaders(headers)),
+        options: Options(headers: _mergeHeaders(headers, useToken)),
       );
       return response;
     } on DioError catch (e) {
@@ -47,13 +47,14 @@ class DioClient {
     Map<String, dynamic>? data,
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
+    bool useToken = true,
   }) async {
     try {
       final response = await _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: _mergeHeaders(headers)),
+        options: Options(headers: _mergeHeaders(headers, useToken)),
       );
       return response;
     } on DioError catch (e) {
@@ -62,9 +63,12 @@ class DioClient {
     }
   }
 
-  Map<String, dynamic> _mergeHeaders(Map<String, dynamic>? additionalHeaders) {
+  Map<String, dynamic> _mergeHeaders(
+    Map<String, dynamic>? additionalHeaders,
+    bool useToken,
+  ) {
     final defaultHeaders = {
-      "Authorization": "Bearer $_accessToken",
+      if (useToken) "Authorization": "Bearer $_accessToken",
     };
     return {
       ...defaultHeaders,
