@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_bengkalis/presentation/screens/movie_detail_screen.dart';
 
 import '../../data/models/movie_list.dart';
 import '../../widgets/component.dart';
@@ -40,6 +41,15 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         bloc.add(FetchMovieListsEvent(page: currentState.currentPage + 1));
       }
     }
+  }
+
+  void _onMovieItemClicked(BuildContext context, MovieList movie) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MovieDetailScreen(movie: movie),
+      ),
+    );
   }
 
   @override
@@ -99,14 +109,17 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
           );
         }
         final movie = movieLists[index];
-        return MovieListCard(
-          key: ValueKey(movie.id),
-          imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
-          title: movie.title,
-          description: movie.overview,
-          voteAverage: movie.voteAverage,
-          voteCount: movie.voteCount,
-          releaseDate: movie.releaseDate,
+        return GestureDetector(
+          onTap: () => _onMovieItemClicked(context, movie),
+          child: MovieListCard(
+            key: ValueKey(movie.id),
+            imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
+            title: movie.title,
+            description: movie.overview,
+            voteAverage: movie.voteAverage,
+            voteCount: movie.voteCount,
+            releaseDate: movie.releaseDate,
+          ),
         );
       },
     );
