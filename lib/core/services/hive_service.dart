@@ -38,7 +38,9 @@ class HiveService<T> {
 
   Future<void> deleteItem(dynamic key) async {
     final box = await _openBox();
-    await box.delete(key.orEmpty());
+    if (box.containsKey(key)) {
+      await box.delete(key);
+    }
   }
 
   Future<void> clearItems() async {
