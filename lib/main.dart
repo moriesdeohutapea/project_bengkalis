@@ -75,7 +75,7 @@ class MainMenu extends StatelessWidget {
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.swap_horiz),
+                  icon: Icon(Icons.favorite),
                   label: 'Favorites',
                 ),
                 BottomNavigationBarItem(
