@@ -9,12 +9,22 @@ abstract class MovieListState extends Equatable {
 
 class MovieListInitial extends MovieListState {}
 
-class MovieListLoading extends MovieListState {}
+class MovieListLoading extends MovieListState {
+  final List<MovieList> movieLists;
+
+  MovieListLoading({this.movieLists = const []});
+
+  @override
+  List<Object?> get props => [movieLists];
+}
 
 class MovieListLoadingPagination extends MovieListState {
   final List<MovieList> movieLists;
 
   MovieListLoadingPagination(this.movieLists);
+
+  @override
+  List<Object?> get props => [movieLists];
 }
 
 class MovieListLoaded extends MovieListState {

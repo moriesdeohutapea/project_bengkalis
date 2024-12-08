@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/movie_list.dart';
 import '../../widgets/component.dart';
 import '../blocs/bloc/MovieListBloc.dart';
 import '../blocs/event/MovieListEvent.dart';
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController(keepScrollOffset: true);
+  double? _lastScrollPosition;
 
   @override
   bool get wantKeepAlive => true;
@@ -33,6 +35,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
       final currentState = bloc.state;
 
       if (currentState is MovieListLoaded && currentState.hasMore) {
+        _lastScrollPosition = _scrollController.position.pixels;
+
         bloc.add(FetchMovieListsEvent(page: currentState.currentPage + 1));
       }
     }
@@ -40,7 +44,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Ensure AutomaticKeepAliveClientMixin is properly used
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const CustomText(
@@ -51,41 +55,50 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         ),
         centerTitle: true,
       ),
-      body: buildMovieList(),
+      body: BlocListener<MovieListBloc, MovieListState>(
+        listener: (context, state) {
+          if (state is MovieListLoaded && _lastScrollPosition != null && _scrollController.hasClients) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollController.jumpTo(_lastScrollPosition!);
+            });
+          }
+        },
+        child: buildMovieList(),
+      ),
     );
   }
 
   Widget buildMovieList() {
     return BlocBuilder<MovieListBloc, MovieListState>(
       builder: (context, state) {
-        if (state is MovieListLoading) {
+        if (state is MovieListLoading && state.movieLists.isEmpty) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is MovieListLoaded) {
-          return buildMovieListView(state);
+        } else if (state is MovieListLoaded || state is MovieListLoadingPagination) {
+          final movieLists = state is MovieListLoaded ? state.movieLists : (state as MovieListLoadingPagination).movieLists;
+          final hasMore = state is MovieListLoaded && state.hasMore;
+          return buildMovieListView(movieLists, hasMore);
         } else if (state is MovieListError) {
           return buildErrorView(state);
         }
-        return const Center(
-          child: CustomText(
-            text: "No data available.",
-            fontSize: 16.0,
-            color: Colors.grey,
-          ),
-        );
+        return const SizedBox.shrink();
       },
     );
   }
 
-  Widget buildMovieListView(MovieListLoaded state) {
+  Widget buildMovieListView(List<MovieList> movieLists, bool hasMore) {
     return ListView.builder(
+      key: const PageStorageKey<String>('movieList'),
       controller: _scrollController,
       padding: const EdgeInsets.all(8.0),
-      itemCount: state.movieLists.length + (state.hasMore ? 1 : 0),
+      itemCount: movieLists.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= state.movieLists.length && state.hasMore) {
-          return const Center(child: CircularProgressIndicator());
+        if (index == movieLists.length && hasMore) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
-        final movie = state.movieLists[index];
+        final movie = movieLists[index];
         return MovieListCard(
           key: ValueKey(movie.id),
           imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,

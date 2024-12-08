@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_bengkalis/core/utils.dart';
 
 import '../../../data/models/movie_list.dart';
 import '../../../data/services/MovieListService.dart';
@@ -43,8 +42,6 @@ class MovieListBloc extends Bloc<MovieListEvent, MovieListState> {
         hasMore: newMovies.isNotEmpty && event.page < response.totalPages,
         currentPage: currentPage,
       ));
-
-
     } on DioException catch (dioError) {
       final errorMessage = dioError.response?.data['status_message'] ?? 'Failed to fetch movie lists';
       emit(MovieListError(errorMessage));
