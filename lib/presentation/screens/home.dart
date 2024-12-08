@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_bengkalis/core/utils.dart';
 
 import '../../widgets/component.dart';
 import '../blocs/bloc/MovieListBloc.dart';
@@ -10,7 +9,7 @@ import '../blocs/state/MovieListState.dart';
 class HomePage extends StatefulWidget {
   final int accountId;
 
-  const HomePage({super.key, required this.accountId});
+  const HomePage({Key? key, required this.accountId}) : super(key: key);
 
   @override
   HomePageState createState() => HomePageState();
@@ -41,6 +40,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Ensure AutomaticKeepAliveClientMixin is properly used
     return Scaffold(
       appBar: AppBar(
         title: const CustomText(
@@ -51,76 +51,80 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
         ),
         centerTitle: true,
       ),
-      body: BlocBuilder<MovieListBloc, MovieListState>(
-        builder: (context, state) {
-          if (state is MovieListLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is MovieListLoaded) {
-            final lists = state.movieLists;
-            return ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8.0),
-              itemCount: lists.length + (state.hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == lists.length && state.hasMore) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                } else if (index == lists.length) {
-                  return const SizedBox.shrink();
-                }
-                final movie = lists[index];
-                return MovieListCard(
-                  key: ValueKey(movie.id),
-                  imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
-                  title: movie.title,
-                  description: movie.overview,
-                  voteAverage: movie.voteAverage,
-                  voteCount: movie.voteCount,
-                  releaseDate: movie.releaseDate,
-                );
-              },
-            );
-          } else if (state is MovieListError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomText(
-                    text: state.message,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomButton(
-                    label: "Retry",
-                    onPressed: () {
-                      context.read<MovieListBloc>().add(FetchMovieListsEvent());
-                    },
-                    backgroundColor: Colors.red,
-                    borderRadius: 12.0,
-                    textStyle: const TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const Center(
-            child: CustomText(
-              text: "No data available.",
+      body: buildMovieList(),
+    );
+  }
+
+  Widget buildMovieList() {
+    return BlocBuilder<MovieListBloc, MovieListState>(
+      builder: (context, state) {
+        if (state is MovieListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is MovieListLoaded) {
+          return buildMovieListView(state);
+        } else if (state is MovieListError) {
+          return buildErrorView(state);
+        }
+        return const Center(
+          child: CustomText(
+            text: "No data available.",
+            fontSize: 16.0,
+            color: Colors.grey,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildMovieListView(MovieListLoaded state) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(8.0),
+      itemCount: state.movieLists.length + (state.hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index >= state.movieLists.length && state.hasMore) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final movie = state.movieLists[index];
+        return MovieListCard(
+          key: ValueKey(movie.id),
+          imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
+          title: movie.title,
+          description: movie.overview,
+          voteAverage: movie.voteAverage,
+          voteCount: movie.voteCount,
+          releaseDate: movie.releaseDate,
+        );
+      },
+    );
+  }
+
+  Widget buildErrorView(MovieListError state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CustomText(
+            text: state.message,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w500,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          CustomButton(
+            label: "Retry",
+            onPressed: () {
+              context.read<MovieListBloc>().add(FetchMovieListsEvent());
+            },
+            backgroundColor: Colors.red,
+            borderRadius: 12.0,
+            textStyle: const TextStyle(
               fontSize: 16.0,
-              color: Colors.grey,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
