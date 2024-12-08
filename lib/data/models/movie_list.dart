@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import 'package:project_bengkalis/core/extension.dart';
+
+part 'movie_list.g.dart';
 
 @HiveType(typeId: 0)
 class MovieList {
@@ -7,7 +8,7 @@ class MovieList {
   final bool adult;
 
   @HiveField(1)
-  final String backdropPath;
+  String backdropPath;
 
   @HiveField(2)
   final List<int> genreIds;
@@ -16,10 +17,10 @@ class MovieList {
   final int id;
 
   @HiveField(4)
-  final String originalLanguage;
+  String originalLanguage;
 
   @HiveField(5)
-  final String originalTitle;
+  String originalTitle;
 
   @HiveField(6)
   final String overview;
@@ -64,20 +65,20 @@ class MovieList {
 
   factory MovieList.fromJson(Map<String, dynamic> json) {
     return MovieList(
-      adult: (json['adult'] as bool?).orFalse(),
-      backdropPath: (json['backdrop_path'] as String?).orEmpty(),
-      genreIds: (json['genre_ids'] as List<dynamic>?).orEmpty().map((e) => (e as int?).orZero()).toList(),
-      id: (json['id'] as int?).orZero(),
-      originalLanguage: (json['original_language'] as String?).orEmpty(),
-      originalTitle: (json['original_title'] as String?).orEmpty(),
-      overview: (json['overview'] as String?).orEmpty(),
-      popularity: (json['popularity'] as num?)!.toDouble().orZero(),
-      posterPath: (json['poster_path'] as String?).orEmpty(),
-      releaseDate: (json['release_date'] as String?).orEmpty(),
-      title: (json['title'] as String?).orEmpty(),
-      video: (json['video'] as bool?).orFalse(),
-      voteAverage: (json['vote_average'] as num?)!.toDouble().orZero(),
-      voteCount: (json['vote_count'] as int?).orZero(),
+      adult: (json['adult'] as bool?) ?? false,
+      backdropPath: (json['backdrop_path'] as String?) ?? '',
+      genreIds: (json['genre_ids'] as List<dynamic>?)?.map((e) => (e as int?) ?? 0).toList() ?? [],
+      id: (json['id'] as int?) ?? 0,
+      originalLanguage: (json['original_language'] as String?) ?? '',
+      originalTitle: (json['original_title'] as String?) ?? '',
+      overview: (json['overview'] as String?) ?? '',
+      popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
+      posterPath: (json['poster_path'] as String?) ?? '',
+      releaseDate: (json['release_date'] as String?) ?? '',
+      title: (json['title'] as String?) ?? '',
+      video: (json['video'] as bool?) ?? false,
+      voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
+      voteCount: (json['vote_count'] as int?) ?? 0,
     );
   }
 

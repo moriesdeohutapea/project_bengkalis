@@ -7,7 +7,6 @@ import '../../widgets/component.dart';
 import '../blocs/bloc/MovieListBloc.dart';
 import '../blocs/event/MovieListEvent.dart';
 import '../blocs/state/MovieListState.dart';
-import 'favorites.dart';
 
 class HomePage extends StatefulWidget {
   final int accountId;

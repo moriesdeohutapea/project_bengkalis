@@ -14,18 +14,16 @@ class SavedMovieScreen extends StatefulWidget {
 
 class _SavedMovieScreenState extends State<SavedMovieScreen> {
   late MovieRepository movieRepository;
-  late List<MovieList> savedMovies;
+  late List<MovieList> savedMovies = [];
 
   @override
   void initState() {
     super.initState();
 
-    // Inisialisasi repository
-    final hiveService = HiveService<MovieList>('moviesBox');
+    final hiveService = HiveService<MovieList>('favoritesBox');
     final localDataSource = MovieLocalDataSource(hiveService);
     movieRepository = MovieRepository(localDataSource);
 
-    // Muat data film yang disimpan
     _loadSavedMovies();
   }
 
@@ -37,10 +35,7 @@ class _SavedMovieScreenState extends State<SavedMovieScreen> {
   }
 
   Future<void> _removeMovie(int id) async {
-    // Hapus movie dari repository
     await movieRepository.deleteMovie(id);
-
-    // Perbarui daftar tampilan
     _loadSavedMovies();
   }
 

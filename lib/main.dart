@@ -1,6 +1,8 @@
 import 'package:chucker_flutter/chucker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:project_bengkalis/data/models/movie_list.dart';
 import 'package:project_bengkalis/di/injection.dart';
 import 'package:project_bengkalis/presentation/blocs/bloc/MovieListBloc.dart';
 import 'package:project_bengkalis/presentation/blocs/bloc/NavigationBloc.dart';
@@ -11,9 +13,14 @@ import 'package:project_bengkalis/presentation/screens/favorites.dart';
 import 'package:project_bengkalis/presentation/screens/home.dart';
 import 'package:project_bengkalis/presentation/screens/profile.dart';
 
+import 'core/list_int_adapter.dart';
 import 'data/services/MovieListService.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(ListIntAdapter());
+  Hive.registerAdapter(MovieListAdapter());
   setupInjector();
   runApp(const MainApp());
 }
@@ -25,7 +32,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-        navigatorObservers: [ChuckerFlutter.navigatorObserver],
+      navigatorObservers: [ChuckerFlutter.navigatorObserver],
       home: const MainMenu(),
     );
   }
@@ -69,7 +76,7 @@ class MainMenu extends StatelessWidget {
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.swap_horiz),
-                  label: 'Transaksi',
+                  label: 'Favorites',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person),

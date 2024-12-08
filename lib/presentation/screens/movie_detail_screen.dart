@@ -1,12 +1,67 @@
 import 'package:flutter/material.dart';
 
+import '../../core/services/hive_service.dart';
 import '../../data/models/movie_list.dart';
 import '../../widgets/component.dart';
 
-class MovieDetailScreen extends StatelessWidget {
+class MovieDetailScreen extends StatefulWidget {
   final MovieList movie;
 
   const MovieDetailScreen({super.key, required this.movie});
+
+  @override
+  State<MovieDetailScreen> createState() => _MovieDetailScreenState();
+}
+
+class _MovieDetailScreenState extends State<MovieDetailScreen> {
+  late HiveService<MovieList> favoritesService;
+  bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    favoritesService = HiveService<MovieList>('favoritesBox');
+
+    _checkIfFavorite();
+  }
+
+  Future<void> _checkIfFavorite() async {
+    final favoriteMovie = await favoritesService.getItem(widget.movie.id.toString());
+    setState(() {
+      isFavorite = favoriteMovie != null;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (isFavorite) {
+      // Hapus dari daftar favorit
+      await favoritesService.deleteItem(widget.movie.id.toString());
+      setState(() {
+        isFavorite = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.movie.title} has been removed from favorites!'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Simpan ke daftar favorit
+      await favoritesService.saveItem(widget.movie.id.toString(), widget.movie);
+      setState(() {
+        isFavorite = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.movie.title} has been added to favorites!'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +85,7 @@ class MovieDetailScreen extends StatelessWidget {
         ClipRRect(
           borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
           child: Image.network(
-            'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+            'https://image.tmdb.org/t/p/w500${widget.movie.backdropPath}',
             height: 250,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -46,6 +101,19 @@ class MovieDetailScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(c);
             },
+          ),
+        ),
+        // Favorite Button
+        Positioned(
+          top: 20,
+          right: 16,
+          child: IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: Colors.white,
+            ),
+            onPressed: _toggleFavorite,
+            iconSize: 30,
           ),
         ),
       ],
@@ -77,7 +145,7 @@ class MovieDetailScreen extends StatelessWidget {
 
   Widget _buildTitle() {
     return CustomText(
-      text: movie.title,
+      text: widget.movie.title,
       fontSize: 24,
       fontWeight: FontWeight.bold,
     );
@@ -88,12 +156,12 @@ class MovieDetailScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         CustomText(
-          text: 'Release: ${movie.releaseDate}',
+          text: 'Release: ${widget.movie.releaseDate}',
           fontSize: 14,
           color: Colors.grey,
         ),
         CustomText(
-          text: '⭐ ${movie.voteAverage.toStringAsFixed(1)}',
+          text: '⭐ ${widget.movie.voteAverage.toStringAsFixed(1)}',
           fontSize: 14,
           color: Colors.orange,
         ),
@@ -111,7 +179,7 @@ class MovieDetailScreen extends StatelessWidget {
 
   Widget _buildOverview() {
     return CustomText(
-      text: movie.overview,
+      text: widget.movie.overview,
       fontSize: 14,
       maxLine: 10,
     );
@@ -120,7 +188,7 @@ class MovieDetailScreen extends StatelessWidget {
   Widget _buildGenres() {
     return Wrap(
       spacing: 8.0,
-      children: movie.genreIds
+      children: widget.movie.genreIds
           .map(
             (id) => Chip(
               label: CustomText(
@@ -138,10 +206,10 @@ class MovieDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDetailItem("Original Title", movie.originalTitle),
-        _buildDetailItem("Original Language", movie.originalLanguage.toUpperCase()),
-        _buildDetailItem("Vote Count", movie.voteCount.toString()),
-        _buildDetailItem("Popularity", movie.popularity.toStringAsFixed(2)),
+        _buildDetailItem("Original Title", widget.movie.originalTitle),
+        _buildDetailItem("Original Language", widget.movie.originalLanguage.toUpperCase()),
+        _buildDetailItem("Vote Count", widget.movie.voteCount.toString()),
+        _buildDetailItem("Popularity", widget.movie.popularity.toStringAsFixed(2)),
       ],
     );
   }
