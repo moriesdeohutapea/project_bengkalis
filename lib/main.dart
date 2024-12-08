@@ -7,9 +7,9 @@ import 'package:project_bengkalis/presentation/blocs/bloc/NavigationBloc.dart';
 import 'package:project_bengkalis/presentation/blocs/event/MovieListEvent.dart';
 import 'package:project_bengkalis/presentation/blocs/event/NavigationEvent.dart';
 import 'package:project_bengkalis/presentation/blocs/state/NavigationState.dart';
+import 'package:project_bengkalis/presentation/screens/favorites.dart';
 import 'package:project_bengkalis/presentation/screens/home.dart';
 import 'package:project_bengkalis/presentation/screens/profile.dart';
-import 'package:project_bengkalis/presentation/screens/transaction.dart';
 
 import 'data/services/MovieListService.dart';
 
@@ -36,7 +36,7 @@ class MainMenu extends StatelessWidget {
 
   final List<Widget> _pages = const [
     HomePage(accountId: 123),
-    TransactionPage(),
+    SavedMovieScreen(),
     ProfilePage(),
   ];
 

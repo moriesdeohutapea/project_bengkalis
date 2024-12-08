@@ -1,19 +1,48 @@
+import 'package:hive/hive.dart';
 import 'package:project_bengkalis/core/extension.dart';
 
+@HiveType(typeId: 0)
 class MovieList {
+  @HiveField(0)
   final bool adult;
+
+  @HiveField(1)
   final String backdropPath;
+
+  @HiveField(2)
   final List<int> genreIds;
+
+  @HiveField(3)
   final int id;
+
+  @HiveField(4)
   final String originalLanguage;
+
+  @HiveField(5)
   final String originalTitle;
+
+  @HiveField(6)
   final String overview;
+
+  @HiveField(7)
   final double popularity;
+
+  @HiveField(8)
   final String posterPath;
+
+  @HiveField(9)
   final String releaseDate;
+
+  @HiveField(10)
   final String title;
+
+  @HiveField(11)
   final bool video;
+
+  @HiveField(12)
   final double voteAverage;
+
+  @HiveField(13)
   final int voteCount;
 
   MovieList({
@@ -37,7 +66,7 @@ class MovieList {
     return MovieList(
       adult: (json['adult'] as bool?).orFalse(),
       backdropPath: (json['backdrop_path'] as String?).orEmpty(),
-      genreIds: (json['genre_ids'] as List<dynamic>?)!.map((e) => (e as int?).orZero()).toList().orEmpty(),
+      genreIds: (json['genre_ids'] as List<dynamic>?).orEmpty().map((e) => (e as int?).orZero()).toList(),
       id: (json['id'] as int?).orZero(),
       originalLanguage: (json['original_language'] as String?).orEmpty(),
       originalTitle: (json['original_title'] as String?).orEmpty(),
