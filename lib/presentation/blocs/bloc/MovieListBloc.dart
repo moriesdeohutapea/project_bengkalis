@@ -43,6 +43,8 @@ class MovieListBloc extends Bloc<MovieListEvent, MovieListState> {
         hasMore: newMovies.isNotEmpty && event.page < response.totalPages,
         currentPage: currentPage,
       ));
+
+
     } on DioException catch (dioError) {
       final errorMessage = dioError.response?.data['status_message'] ?? 'Failed to fetch movie lists';
       emit(MovieListError(errorMessage));

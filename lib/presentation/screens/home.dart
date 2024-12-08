@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_bengkalis/core/utils.dart';
 
-import '../../data/services/MovieListService.dart';
-import '../../di/injection.dart';
 import '../../widgets/component.dart';
 import '../blocs/bloc/MovieListBloc.dart';
 import '../blocs/event/MovieListEvent.dart';
@@ -18,115 +16,118 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
-  final ScrollController _scrollController = ScrollController();
+class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
+  final ScrollController _scrollController = ScrollController(keepScrollOffset: true);
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
-        final bloc = context.read<MovieListBloc>();
-        final currentState = bloc.state;
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
+      final bloc = context.read<MovieListBloc>();
+      final currentState = bloc.state;
 
-        if (currentState is MovieListLoaded && currentState.hasMore) {
-          bloc.add(FetchMovieListsEvent(page: currentState.currentPage + 1));
-        }
+      if (currentState is MovieListLoaded && currentState.hasMore) {
+        bloc.add(FetchMovieListsEvent(page: currentState.currentPage + 1));
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MovieListBloc(getIt<MovieListService>())..add(FetchMovieListsEvent()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const CustomText(
-            text: "Movie Lists",
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-            textAlign: TextAlign.center,
-          ),
-          centerTitle: true,
+    return Scaffold(
+      appBar: AppBar(
+        title: const CustomText(
+          text: "Movie Lists",
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          textAlign: TextAlign.center,
         ),
-        body: BlocBuilder<MovieListBloc, MovieListState>(
-          builder: (context, state) {
-            if (state is MovieListLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is MovieListLoaded) {
-              final lists = state.movieLists;
-              return ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(8.0),
-                itemCount: lists.length + (state.hasMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == lists.length && state.hasMore) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  } else if (index == lists.length) {
-                    return const SizedBox.shrink();
-                  }
-                  final movie = lists[index];
-                  return MovieListCard(
-                    imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
-                    title: movie.title,
-                    description: movie.overview,
-                    voteAverage: movie.voteAverage,
-                    voteCount: movie.voteCount,
-                    releaseDate: movie.releaseDate,
+        centerTitle: true,
+      ),
+      body: BlocBuilder<MovieListBloc, MovieListState>(
+        builder: (context, state) {
+          if (state is MovieListLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is MovieListLoaded) {
+            final lists = state.movieLists;
+            return ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8.0),
+              itemCount: lists.length + (state.hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == lists.length && state.hasMore) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
                   );
-                },
-              );
-            } else if (state is MovieListError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomText(
-                      text: state.message,
+                } else if (index == lists.length) {
+                  return const SizedBox.shrink();
+                }
+                final movie = lists[index];
+                return MovieListCard(
+                  key: ValueKey(movie.id),
+                  imageUrl: movie.posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500${movie.posterPath}' : null,
+                  title: movie.title,
+                  description: movie.overview,
+                  voteAverage: movie.voteAverage,
+                  voteCount: movie.voteCount,
+                  releaseDate: movie.releaseDate,
+                );
+              },
+            );
+          } else if (state is MovieListError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomText(
+                    text: state.message,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomButton(
+                    label: "Retry",
+                    onPressed: () {
+                      context.read<MovieListBloc>().add(FetchMovieListsEvent());
+                    },
+                    backgroundColor: Colors.red,
+                    borderRadius: 12.0,
+                    textStyle: const TextStyle(
                       fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 16),
-                    CustomButton(
-                      label: "Retry",
-                      onPressed: () {
-                        context.read<MovieListBloc>().add(FetchMovieListsEvent());
-                      },
-                      backgroundColor: Colors.red,
-                      borderRadius: 12.0,
-                      textStyle: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const Center(
-              child: CustomText(
-                text: "No data available.",
-                fontSize: 16.0,
-                color: Colors.grey,
+                  ),
+                ],
               ),
             );
-          },
-        ),
+          }
+          return const Center(
+            child: CustomText(
+              text: "No data available.",
+              fontSize: 16.0,
+              color: Colors.grey,
+            ),
+          );
+        },
       ),
     );
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
