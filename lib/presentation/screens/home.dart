@@ -11,7 +11,7 @@ import '../blocs/state/MovieListState.dart';
 class HomePage extends StatefulWidget {
   final int accountId;
 
-  const HomePage({Key? key, required this.accountId}) : super(key: key);
+  const HomePage({super.key, required this.accountId});
 
   @override
   HomePageState createState() => HomePageState();
