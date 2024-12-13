@@ -3,17 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/models/movie_list.dart';
 import '../../../data/services/MovieListService.dart';
-import '../event/MovieListEvent.dart';
-import '../state/MovieListState.dart';
+import 'MovieListEvent.dart';
+import 'MovieListState.dart';
 
 class MovieListBloc extends Bloc<MovieListEvent, MovieListState> {
   final MovieListService movieListService;
 
   MovieListBloc(this.movieListService) : super(MovieListInitial()) {
-    on<FetchMovieListsEvent>(_onFetchMovieLists);
+    on<FetchMovieListsEvent>(_handleFetchMovies);
+    on<RefreshMovieListsEvent>(_handleRefreshMovies);
   }
 
-  Future<void> _onFetchMovieLists(FetchMovieListsEvent event, Emitter<MovieListState> emit) async {
+  Future<void> _handleFetchMovies(FetchMovieListsEvent event, Emitter<MovieListState> emit) async {
     try {
       final currentState = state;
       List<MovieList> currentMovies = [];
@@ -47,6 +48,27 @@ class MovieListBloc extends Bloc<MovieListEvent, MovieListState> {
       emit(MovieListError(errorMessage));
     } catch (e) {
       emit(MovieListError('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _handleRefreshMovies(RefreshMovieListsEvent event, Emitter<MovieListState> emit) async {
+    try {
+      emit(MovieListLoading());
+      final response = await movieListService.fetchMovieLists(
+        page: 1,
+        includeAdult: event.includeAdult,
+        includeVideo: event.includeVideo,
+        language: event.language,
+        sortBy: event.sortBy,
+      );
+
+      emit(MovieListLoaded(
+        movieLists: response.results as List<MovieList>,
+        hasMore: response.results.isNotEmpty,
+        currentPage: 1,
+      ));
+    } catch (e) {
+      emit(MovieListError('Failed to refresh movies: ${e.toString()}'));
     }
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/hive_service.dart';
 import '../../data/models/movie_list.dart';
-import '../../widgets/component.dart';
+import '../widgets/component.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   final MovieList movie;

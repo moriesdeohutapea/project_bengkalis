@@ -11,9 +11,10 @@ class NavigationInitial extends NavigationState {}
 
 class NavigationTabSelected extends NavigationState {
   final int tabIndex;
+  final String tabName;
 
-  const NavigationTabSelected(this.tabIndex);
+  const NavigationTabSelected(this.tabIndex, this.tabName);
 
   @override
-  List<Object> get props => [tabIndex];
+  List<Object> get props => [tabIndex, tabName];
 }

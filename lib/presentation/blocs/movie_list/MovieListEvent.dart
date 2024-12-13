@@ -50,3 +50,31 @@ class RefreshMovieListsEvent extends MovieListEvent {
     return 'RefreshMovieListsEvent(includeAdult: $includeAdult, includeVideo: $includeVideo, language: $language, sortBy: $sortBy)';
   }
 }
+
+class ScrollReachedBottom extends MovieListEvent {
+  final int currentPage;
+
+  ScrollReachedBottom(this.currentPage);
+
+  @override
+  List<Object?> get props => [currentPage];
+
+  @override
+  String toString() {
+    return 'ScrollReachedBottom(currentPage: $currentPage)';
+  }
+}
+
+class UpdateScrollPosition extends MovieListEvent {
+  final double scrollPosition;
+
+  UpdateScrollPosition(this.scrollPosition);
+
+  @override
+  List<Object?> get props => [scrollPosition];
+
+  @override
+  String toString() {
+    return 'UpdateScrollPosition(scrollPosition: $scrollPosition)';
+  }
+}
