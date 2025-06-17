@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/component.dart';
+import '../widgets/component.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
